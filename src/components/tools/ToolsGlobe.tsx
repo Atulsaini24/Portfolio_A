@@ -15,15 +15,22 @@ export function ToolsGlobe() {
   const spin = useRef<Spin>({ vx: 0.0035, vy: 0, dragging: false });
   const last = useRef({ x: 0, y: 0 });
   const [mode, setMode] = useState<"3d" | "2d" | null>(null);
-  const [inView, setInView] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [active, setActive] = useState(false);
   const [hot, setHot] = useState<string | null>(null);
 
   useEffect(() => {
     setMode(hasWebGL() ? "3d" : "2d");
     const el = hostRef.current;
     if (!el) return;
-    // Mount the globe only once it is near the viewport, so it never slows the first load.
-    const io = new IntersectionObserver(([e]) => e.isIntersecting && setInView(true), { rootMargin: "300px" });
+    // Mount the globe once it nears the viewport, then pause rendering whenever out of view.
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) setMounted(true);
+        setActive(e.isIntersecting);
+      },
+      { rootMargin: "150px" },
+    );
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -67,8 +74,8 @@ export function ToolsGlobe() {
           onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
           role="img" aria-label={`Interactive globe of the tools Atul uses: ${technologies.join(", ")}`}
         >
-          {inView && mode === "3d" && <Globe3D items={technologies} spin={spin} onHover={setHot} />}
-          {inView && mode === "2d" && <Globe2D items={technologies} spin={spin} onHover={setHot} />}
+          {mounted && mode === "3d" && <Globe3D items={technologies} spin={spin} onHover={setHot} active={active} />}
+          {mounted && mode === "2d" && <Globe2D items={technologies} spin={spin} onHover={setHot} />}
         </div>
       </div>
     </section>

@@ -39,18 +39,38 @@ export function ProjectDrawer({ project, onClose }: { project: Project | null; o
             <p className="k">{project.kind}</p>
             <p>{project.summary}</p>
             <dl>
-              <dt>Stack</dt><dd>{project.stack.join(", ")}</dd>
-              <dt>My role</dt><dd>{project.role}</dd>
+              {project.problem && (
+                <>
+                  <dt>Problem</dt>
+                  <dd>{project.problem}</dd>
+                </>
+              )}
+              {project.architecture && (
+                <>
+                  <dt>Architecture</dt>
+                  <dd>{project.architecture}</dd>
+                </>
+              )}
+              {project.metric && (
+                <>
+                  <dt>Key Metric</dt>
+                  <dd>{project.metric}</dd>
+                </>
+              )}
+              <dt>Tech Stack</dt>
+              <dd>{project.stack.join(", ")}</dd>
+              <dt>My Role</dt>
+              <dd>{project.role}</dd>
               <dt>Links</dt>
               <dd>
                 {project.liveUrl || project.sourceUrl ? (
                   <>
                     {project.liveUrl && <a href={project.liveUrl} target="_blank" rel="noopener">Live site</a>}
-                    {project.liveUrl && project.sourceUrl && ", "}
+                    {project.liveUrl && project.sourceUrl && " • "}
                     {project.sourceUrl && <a href={project.sourceUrl} target="_blank" rel="noopener">Source code</a>}
                   </>
                 ) : (
-                  "Live demo and source coming soon"
+                  "Live demo coming soon"
                 )}
               </dd>
             </dl>

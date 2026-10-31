@@ -6,9 +6,9 @@ import { useSite } from "@/lib/site-context";
 import { EASE_OUT, prefersReducedMotion } from "@/lib/motion";
 import { RollText } from "./RollText";
 
-// The loader video's background is forest green until 2.2s, then lime / lilac.
-const DARK_TEXT_AFTER = 2.2;
-const FALLBACK_DURATION = 5.2;
+// Snappy loader: 1.5s fallback so recruiters are never held hostage.
+const DARK_TEXT_AFTER = 0.9;
+const FALLBACK_DURATION = 1.6;
 
 /** One rolling digit column (0–9). */
 function Digit({ value }: { value: number }) {
@@ -36,7 +36,7 @@ function Odometer({ value }: { value: number }) {
  * Plays on every page load (including hard refresh) and when "Replay intro" is pressed.
  */
 export function Loader() {
-  const { introActive, finishIntro } = useSite();
+  const { introActive, finishIntro, introRun } = useSite();
   const [visible, setVisible] = useState(true);
   const [count, setCount] = useState(0);
   const [darkText, setDarkText] = useState(false);
@@ -54,6 +54,9 @@ export function Loader() {
   const finish = useCallback(async () => {
     if (done.current) return;
     done.current = true;
+    try {
+      sessionStorage.setItem("atul_intro_seen", "1");
+    } catch {}
     setCount(100);
     const wipes = Array.from(wipesRef.current?.children ?? []) as HTMLElement[];
     if (prefersReducedMotion() || wipes.length === 0) {
@@ -62,14 +65,14 @@ export function Loader() {
       return;
     }
     await Promise.all(
-      wipes.map((w, i) => animate(w, { y: ["100%", "0%"] }, { duration: 0.7, delay: i * 0.09, ease: EASE_OUT })),
+      wipes.map((w, i) => animate(w, { y: ["100%", "0%"] }, { duration: 0.5, delay: i * 0.06, ease: EASE_OUT })),
     );
     videoRef.current?.pause();
     setVisible(false);
     window.scrollTo(0, 0);
     finishIntro();
     [...wipes].reverse().forEach((w, i) =>
-      animate(w, { y: ["0%", "-100%"] }, { duration: 0.85, delay: i * 0.08, ease: EASE_OUT }),
+      animate(w, { y: ["0%", "-100%"] }, { duration: 0.65, delay: i * 0.06, ease: EASE_OUT }),
     );
   }, [finishIntro]);
 
@@ -82,8 +85,16 @@ export function Loader() {
     setDarkText(false);
     wipesRef.current?.querySelectorAll<HTMLElement>("i").forEach((w) => (w.style.transform = "translateY(100%)"));
 
+    const alreadySeen = typeof window !== "undefined" && sessionStorage.getItem("atul_intro_seen") === "1";
+    if (alreadySeen && introRun === 0) {
+      // User has already visited this session: skip immediately without blocking
+      setVisible(false);
+      finishIntro();
+      return;
+    }
+
     if (prefersReducedMotion()) {
-      const t = setTimeout(finish, 300);
+      const t = setTimeout(finish, 200);
       return () => clearTimeout(t);
     }
 
@@ -92,6 +103,7 @@ export function Loader() {
     const tryPlay = () => {
       const v = videoRef.current;
       if (v && v.paused) {
+        v.playbackRate = 1.4;
         v.currentTime = 0;
         v.play().catch(() => {});
       }
@@ -100,12 +112,11 @@ export function Loader() {
     const tick = () => {
       if (done.current) return;
       const v = videoRef.current;
-      // The <video> can mount a frame after this effect (e.g. on replay); keep nudging it to play.
-      if (v && v.paused && performance.now() - start < 1500) tryPlay();
+      if (v && v.paused && performance.now() - start < 1000) tryPlay();
       const playing = !!v && !v.paused && !!v.duration;
       const elapsed = (performance.now() - start) / 1000;
       const t = playing ? v!.currentTime : elapsed;
-      const pct = playing ? (v!.currentTime / (v!.duration - 0.9)) * 100 : (elapsed / FALLBACK_DURATION) * 100;
+      const pct = playing ? (v!.currentTime / (v!.duration - 0.4)) * 100 : (elapsed / FALLBACK_DURATION) * 100;
       shown.current = Math.max(shown.current, Math.min(100, pct));
       setCount(Math.round(shown.current));
       setDarkText(t > DARK_TEXT_AFTER);
@@ -114,7 +125,7 @@ export function Loader() {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [introActive, finish]);
+  }, [introActive, introRun, finish, finishIntro]);
 
   return (
     <>

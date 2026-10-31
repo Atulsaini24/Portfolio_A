@@ -276,9 +276,8 @@ export function HeroScene({ assembled, progress }: { assembled: boolean; progres
 
     let lastNow = 0;
     const step = (now: number) => {
-      if (!alive) return;
+      if (!alive || !visible) return;
       frame = requestAnimationFrame(step);
-      if (!visible) { lastNow = now; return; }
       // Physics is tuned for 60fps; run extra sub-steps on slow frames so it looks the same everywhere.
       const substeps = Math.max(1, Math.min(4, Math.round((now - (lastNow || now - 16.7)) / 16.7)));
       lastNow = now;
@@ -373,7 +372,17 @@ export function HeroScene({ assembled, progress }: { assembled: boolean; progres
     };
     let resizeTimer = 0;
     const onResize = () => { clearTimeout(resizeTimer); resizeTimer = window.setTimeout(build, 150); };
-    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
+    const io = new IntersectionObserver(([e]) => {
+      const nowVisible = e.isIntersecting;
+      if (nowVisible && !visible && alive && img.complete) {
+        visible = true;
+        lastNow = performance.now();
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(step);
+      } else {
+        visible = nowVisible;
+      }
+    });
 
     img.onload = () => { build(); frame = requestAnimationFrame(step); };
     host.addEventListener("pointermove", onMove);

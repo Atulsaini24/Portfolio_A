@@ -8,7 +8,12 @@ import type { Spin } from "./spin";
 import { fibonacciSphere } from "./spin";
 
 const RADIUS = 3.4;
-type GlobeProps = { items: string[]; spin: React.RefObject<Spin>; onHover: (t: string | null) => void };
+type GlobeProps = {
+  items: string[];
+  spin: React.RefObject<Spin>;
+  onHover: (t: string | null) => void;
+  active?: boolean;
+};
 const FONT = '700 64px "Bricolage Grotesque Variable", system-ui, sans-serif';
 
 function useLabelTexture(text: string, fontVersion: number) {
@@ -117,9 +122,14 @@ function FitCamera() {
   return null;
 }
 
-export default function Globe3D({ items, spin, onHover }: GlobeProps) {
+export default function Globe3D({ items, spin, onHover, active = true }: GlobeProps) {
   return (
-    <Canvas camera={{ position: [0, 0, 9.5], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }} frameloop="always">
+    <Canvas
+      camera={{ position: [0, 0, 9.5], fov: 40 }}
+      dpr={[1, 2]}
+      gl={{ antialias: true, alpha: true }}
+      frameloop={active ? "always" : "never"}
+    >
       <FitCamera />
       <Globe items={items} spin={spin} onHover={onHover} />
     </Canvas>

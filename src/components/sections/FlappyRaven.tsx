@@ -96,10 +96,10 @@ export function FlappyRaven() {
     const pill = (x: number, y: number, w: number, h: number, r: number) => { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); };
 
     const loop = (t: number) => {
+      if (!inView) return;
       frame = requestAnimationFrame(loop);
       const dt = Math.min(0.033, (t - last) / 1000 || 0);
       last = t;
-      if (!inView) return;
       const level = Math.min(current, 30);
       const g = H * 2.6;
       const speed = Math.max(190, W * 0.28) * (1 + level * 0.02);
@@ -197,9 +197,18 @@ export function FlappyRaven() {
     };
     const onResize = () => { size(); if (state !== "play") reset(); };
     const io = new IntersectionObserver(([e]) => {
-      inView = e.intersectionRatio > 0.5;
-      if (!inView && state === "play") sfx.stopMusic();
-      if (inView && state === "play") sfx.startMusic();
+      const nowInView = e.intersectionRatio > 0.5;
+      if (nowInView && !inView) {
+        inView = true;
+        last = performance.now();
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(loop);
+        if (state === "play") sfx.startMusic();
+      } else if (!nowInView && inView) {
+        inView = false;
+        cancelAnimationFrame(frame);
+        if (state === "play") sfx.stopMusic();
+      }
     }, { threshold: [0, 0.5, 1] });
 
     size(); reset();
