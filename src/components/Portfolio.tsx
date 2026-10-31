@@ -11,6 +11,8 @@ import { ToolsGlobe } from "./tools/ToolsGlobe";
 import { FlappyRaven } from "./sections/FlappyRaven";
 import { Contact } from "./sections/Contact";
 import { VelocityMarquee } from "./VelocityMarquee";
+import { AskAtul } from "./ask/AskAtul";
+import { QuickView } from "./QuickView";
 
 export default function Portfolio() {
   return (
@@ -30,6 +32,8 @@ export default function Portfolio() {
         <FlappyRaven />
         <Contact />
       </main>
+      <AskAtul />
+      <QuickView />
     </SiteProvider>
   );
 }

@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { useRef } from "react";
-import { capabilities, site } from "@/data/site";
+import { capabilities, facts, site } from "@/data/site";
 import { EASE_OUT } from "@/lib/motion";
 import { RavenStage } from "../raven/RavenStage";
 
@@ -54,6 +54,13 @@ export function About() {
         </p>
         <RavenStage scroll={sectionProgress} />
       </div>
+      {facts.some((f) => f.value.trim()) && (
+        <dl className="wrap facts">
+          {facts.filter((f) => f.value.trim()).map((f) => (
+            <div key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></div>
+          ))}
+        </dl>
+      )}
       <div className="wrap caps">
         {capabilities.map((c, i) => <Capability key={c.title} {...c} index={i} />)}
       </div>

@@ -72,7 +72,9 @@ function useIndiaTime() {
 }
 
 export function Nav() {
-  const { navigate, lock, unlock, introRun } = useSite();
+  const { navigate, lock, unlock, introRun, setAskOpen, setQuickView, hasResume } = useSite();
+  const [mac, setMac] = useState(true);
+  useEffect(() => setMac(/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)), []);
   const [hovered, setHovered] = useState<string | null>(null);
   const [compact, setCompact] = useState(false);
   const [open, setOpen] = useState(false);
@@ -136,6 +138,17 @@ export function Nav() {
           </motion.nav>
 
           <motion.div className="nav-right" {...drop(2)}>
+            <button className="ask-btn" onClick={() => setAskOpen(true)} aria-label="Ask Atul’s AI about his work">
+              <span className="ask-btn-dot" aria-hidden="true" />
+              <span className="ask-btn-label">Ask my AI</span>
+              <kbd aria-hidden="true">{mac ? "⌘" : "Ctrl"} K</kbd>
+            </button>
+            {hasResume && (
+              <a className="resume-btn" href={site.resume} target="_blank" rel="noopener">
+                <RollText>Resume</RollText>
+                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v9m0 0L4 7m4 4 4-4M3 14h10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </a>
+            )}
             <Magnetic strength={0.35}>
               <a href="#contact" className="cta" onClick={go("contact")}>
                 <RollText>Let’s talk</RollText>
@@ -162,6 +175,11 @@ export function Nav() {
           {open && (
             <motion.div className="sheet-foot" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.5 } }} exit={{ opacity: 0 }}>
               <p>Open to internships, full-time roles and collaborations.</p>
+              <p className="sheet-actions">
+                <button onClick={() => { setOpen(false); setAskOpen(true); }}>Ask my AI</button>
+                <button onClick={() => { setOpen(false); setQuickView(true); }}>Recruiter view</button>
+                {hasResume && <a href={site.resume} target="_blank" rel="noopener">Resume</a>}
+              </p>
               <p>
                 <a href={site.github} target="_blank" rel="noopener">GitHub</a>
                 <a href={site.linkedin} target="_blank" rel="noopener">LinkedIn</a>

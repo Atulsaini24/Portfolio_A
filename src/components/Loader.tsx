@@ -85,8 +85,11 @@ export function Loader() {
     setDarkText(false);
     wipesRef.current?.querySelectorAll<HTMLElement>("i").forEach((w) => (w.style.transform = "translateY(100%)"));
 
-    const alreadySeen = typeof window !== "undefined" && sessionStorage.getItem("atul_intro_seen") === "1";
-    if (alreadySeen && introRun === 0) {
+    let alreadySeen = false;
+    try { alreadySeen = sessionStorage.getItem("atul_intro_seen") === "1"; } catch {}
+    // Recruiters arriving on a ?view=quick link go straight to the summary, no intro.
+    const quickLink = new URLSearchParams(location.search).get("view") === "quick";
+    if ((alreadySeen || quickLink) && introRun === 0) {
       // User has already visited this session: skip immediately without blocking
       setVisible(false);
       finishIntro();

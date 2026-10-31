@@ -136,10 +136,12 @@ export function HeroScene({ assembled, progress }: { assembled: boolean; progres
         const ang = -Math.PI / 2 + (Math.random() - 0.5) * 2.4;
         const p: Particle = {
           hx: ox + x * gap, hy,
-          x: old ? old.x : Math.random() * W, y: old ? old.y : Math.random() * H,
+          x: old ? old.x : ox + x * gap + (Math.random() - 0.5) * W * 0.9,
+          y: old ? old.y : hy + (Math.random() - 0.5) * H * 0.9,
           vx: 0, vy: 0, size: gap * (0.22 + lum * 0.7) * Math.pow(alpha, 0.9),
-          k: 0.018 + Math.random() * 0.03,
-          delay: old ? 0 : Math.random() * 60 + ((hy - oy) / ph) * 50,
+          k: 0.04 + Math.random() * 0.035,
+          // Stagger top-to-bottom, but keep it tight: everything is moving within ~0.55s.
+          delay: old ? 0 : Math.random() * 14 + ((hy - oy) / ph) * 20,
           phase: Math.random() * 6.28, dx: Math.cos(ang), dy: Math.sin(ang), dist: 150 + Math.random() * 650,
         };
         if (reduce) { p.x = p.hx; p.y = p.hy; p.delay = 0; }
@@ -188,7 +190,7 @@ export function HeroScene({ assembled, progress }: { assembled: boolean; progres
 
       // the signature, written left-to-right by the shooting star
       if (since >= 0 || reduce) {
-        const t = reduce ? 99 : since - 1.5;
+        const t = reduce ? 99 : since - 0.9;
         const star = starAt(Math.max(0, t));
         const revealX = t < 0 ? SIG.x0 - 10 : star.phase === "enter" ? SIG.x0 - 10 : star.phase === "write" ? star.x : SIG.x1 + 50;
         b.save();
@@ -263,7 +265,7 @@ export function HeroScene({ assembled, progress }: { assembled: boolean; progres
 
       // cut Atul's silhouette out of everything on this layer, so it all sits behind him
       if (img.complete && since >= 0) {
-        const knock = clamp01((since - 0.3) / 2.2) * (1 - clamp01(scroll * 2.2));
+        const knock = clamp01((since - 0.2) / 1.2) * (1 - clamp01(scroll * 2.2));
         if (knock > 0) {
           b.save();
           b.globalCompositeOperation = "destination-out";
@@ -279,7 +281,7 @@ export function HeroScene({ assembled, progress }: { assembled: boolean; progres
       if (!alive || !visible) return;
       frame = requestAnimationFrame(step);
       // Physics is tuned for 60fps; run extra sub-steps on slow frames so it looks the same everywhere.
-      const substeps = Math.max(1, Math.min(4, Math.round((now - (lastNow || now - 16.7)) / 16.7)));
+      const substeps = Math.max(1, Math.min(6, Math.round((now - (lastNow || now - 16.7)) / 16.7)));
       lastNow = now;
       tick += substeps;
       sub = substeps;

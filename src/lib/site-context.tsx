@@ -4,6 +4,7 @@ import Lenis from "lenis";
 import { animate } from "motion/react";
 import Image from "next/image";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { site } from "@/data/site";
 import { EASE_IN_OUT, prefersReducedMotion } from "./motion";
 
 type SiteContextValue = {
@@ -18,6 +19,14 @@ type SiteContextValue = {
   lock: (reason: string) => void;
   unlock: (reason: string) => void;
   toast: (message: string) => void;
+  /** The no-animation one-screen summary for recruiters. Also opens from ?view=quick. */
+  quickView: boolean;
+  setQuickView: (open: boolean) => void;
+  /** The “Ask Atul” AI panel. */
+  askOpen: boolean;
+  setAskOpen: (open: boolean) => void;
+  /** True once public/resume.pdf is confirmed to exist. */
+  hasResume: boolean;
 };
 
 const SiteContext = createContext<SiteContextValue | null>(null);
@@ -37,6 +46,30 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
   const [introActive, setIntroActive] = useState(true);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number>(0);
+  const [quickView, setQuickViewState] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
+  const [hasResume, setHasResume] = useState(false);
+
+  // Open the recruiter view straight from a shared link (?view=quick).
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get("view") === "quick") setQuickViewState(true);
+  }, []);
+
+  // Only show resume buttons once the file actually exists, so there’s never a dead link.
+  useEffect(() => {
+    if (!site.resume) return;
+    fetch(site.resume, { method: "HEAD" })
+      .then((r) => setHasResume(r.ok && !(r.headers.get("content-type") ?? "").includes("text/html")))
+      .catch(() => {});
+  }, []);
+
+  const setQuickView = useCallback((open: boolean) => {
+    setQuickViewState(open);
+    const url = new URL(location.href);
+    if (open) url.searchParams.set("view", "quick");
+    else url.searchParams.delete("view");
+    history.replaceState(null, "", url);
+  }, []);
 
   const applyLock = useCallback(() => {
     const locked = locks.current.size > 0;
@@ -122,8 +155,11 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ introRun, introActive, finishIntro, replayIntro, navigate, scrollTo, lock, unlock, toast }),
-    [introRun, introActive, finishIntro, replayIntro, navigate, scrollTo, lock, unlock, toast],
+    () => ({
+      introRun, introActive, finishIntro, replayIntro, navigate, scrollTo, lock, unlock, toast,
+      quickView, setQuickView, askOpen, setAskOpen, hasResume,
+    }),
+    [introRun, introActive, finishIntro, replayIntro, navigate, scrollTo, lock, unlock, toast, quickView, setQuickView, askOpen, hasResume],
   );
 
   return (

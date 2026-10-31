@@ -32,7 +32,7 @@ function useLabelTexture(text: string, fontVersion: number) {
     const w = Math.min(500, c.measureText(text).width + 72), left = (512 - w) / 2;
     c.beginPath();
     c.roundRect(left, 16, w, 96, 48);
-    c.fillStyle = hot ? PALETTE.lime : "rgba(241,243,234,.08)";
+    c.fillStyle = hot ? PALETTE.lime : "#1B2E1F";
     c.fill();
     if (!hot) { c.strokeStyle = "rgba(241,243,234,.35)"; c.lineWidth = 3; c.stroke(); }
     c.fillStyle = hot ? PALETTE.ink : PALETTE.bone;
@@ -58,6 +58,7 @@ function Label({ text, position, fontVersion, onHover }: { text: string; positio
     s.getWorldPosition(world);
     const depth = (world.z + RADIUS) / (2 * RADIUS);
     (s.material as THREE.SpriteMaterial).opacity = 0.22 + depth * 0.78;
+    s.renderOrder = Math.round(depth * 1000); // nearer labels draw on top
     const k = (hot.current ? 1.25 : 1) * (0.75 + depth * 0.35);
     s.scale.x += (2 * k - s.scale.x) * 0.2;
     s.scale.y += (0.5 * k - s.scale.y) * 0.2;

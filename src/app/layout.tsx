@@ -33,10 +33,10 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/assets/portrait-particles.png",
+        url: "/og.png",
         width: 1200,
         height: 630,
-        alt: "Atul Saini – Particle Portrait and Interactive Portfolio",
+        alt: "Atul Saini, full-stack developer and AI engineer",
       },
     ],
   },
@@ -44,8 +44,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Atul Saini – Full-stack developer and AI engineer",
     description: "AI products built end to end, from the database to the last pixel of motion.",
-    images: ["/assets/portrait-particles.png"],
-    creator: "@Atulsaini24",
+    images: ["/og.png"],
+    // Add creator: "@yourhandle" here if you use X/Twitter.
   },
   robots: {
     index: true,

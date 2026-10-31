@@ -27,7 +27,10 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
       style={{ rotateX, rotateY, transformPerspective: 1200 }}
     >
       <div className="art"><ProjectArt kind={project.art} ink={inkFor(project.tone)} /></div>
-      <span className="kind">{project.kind}</span>
+      <span className="kind">
+        {project.kind}
+        {project.demo && <em className="has-demo">Live demo inside</em>}
+      </span>
       <div>
         <h3>{project.name}</h3>
         <p className="sum">{project.summary}</p>
@@ -64,6 +67,16 @@ export function Work() {
   }, []);
 
   const close = useCallback(() => setOpen(null), []);
+
+  // The AI and the recruiter view can open a project by slug.
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const p = projects.find((x) => x.slug === (e as CustomEvent<string>).detail);
+      if (p) setOpen(p);
+    };
+    addEventListener("open-project", onOpen);
+    return () => removeEventListener("open-project", onOpen);
+  }, []);
 
   return (
     <section className="work" id="work">

@@ -6,17 +6,32 @@ export const site = {
   intro:
     "Full-stack developer and AI engineer in India, building products from the database to the last pixel of motion.",
   availability: "Available for internships and full-time roles",
+  // Built from the actual work below, so it says something only you can say.
   statement:
-    "I’m Atul. I build AI products end to end, and I care just as much about how they feel as how they work. Give me a fuzzy idea and I’ll hand back something people actually enjoy using.",
-  // TODO: replace with your real details before publishing.
+    "I’m Atul. I’ve built a meeting AI that remembers what was decided, a scraper that repairs its own selectors, a finance app that answers in under 50 ms, and a messenger that works with no network at all. Different problems, same habit: I don’t stop at “it works”. I stop when it feels right in your hand.",
+  // Shown in the nav, the recruiter view and by the AI. Put your PDF at public/resume.pdf.
+  // The resume buttons hide themselves automatically until that file exists.
+  resume: "/resume.pdf",
   email: "atulsaini2496@gmail.com",
   github: "https://github.com/Atulsaini24",
   linkedin: "https://www.linkedin.com/in/atul-saini-910838326/",
   timeZone: "Asia/Kolkata",
 };
 
+/**
+ * Personal facts. Each one appears in the About section, the recruiter view and the AI’s knowledge,
+ * but only once you fill it in. Empty strings are hidden, so nothing half-finished goes live.
+ */
+export const facts: { label: string; value: string }[] = [
+  { label: "Studying", value: "" }, // e.g. "B.Tech CSE at XYZ University, graduating 2027"
+  { label: "Based in", value: "India (IST)" },
+  { label: "Currently", value: "" }, // e.g. "Adding voice search to Meet AI"
+  { label: "Off screen", value: "" }, // e.g. "Football, chess, and too much chai"
+];
+
 export type ProjectTone = "lime" | "lilac" | "bone" | "deep";
 export type ProjectArtKind = "waves" | "flow" | "bars" | "mesh";
+export type ProjectDemoKind = "mesh" | "ledger" | "heal";
 
 export type Project = {
   slug: string;
@@ -32,6 +47,8 @@ export type Project = {
   art: ProjectArtKind;
   liveUrl?: string;
   sourceUrl?: string;
+  /** An in-browser demo shown in the project drawer. */
+  demo?: ProjectDemoKind;
 };
 
 export const projects: Project[] = [
@@ -61,6 +78,7 @@ export const projects: Project[] = [
     role: "System architecture, distributed worker queue, and frontend build",
     tone: "lilac",
     art: "flow",
+    demo: "heal",
     sourceUrl: "https://github.com/Atulsaini24",
   },
   {
@@ -75,6 +93,7 @@ export const projects: Project[] = [
     role: "Product design, front-end architecture, and custom charting engine",
     tone: "bone",
     art: "bars",
+    demo: "ledger",
     sourceUrl: "https://github.com/Atulsaini24",
   },
   {
@@ -89,6 +108,7 @@ export const projects: Project[] = [
     role: "Protocol design, routing algorithm research, and prototype application",
     tone: "deep",
     art: "mesh",
+    demo: "mesh",
     sourceUrl: "https://github.com/Atulsaini24",
   },
 ];

@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- Source for public/og.png (the link-preview image). Regenerate with: node scripts/make-og.mjs
+     The __PLACEHOLDERS__ are filled with inlined files by that script. -->
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"Bricolage";src:url("__FONT__") format("woff2");font-weight:200 800;font-stretch:75% 100%}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1200px;height:630px;overflow:hidden;background:#1E3422}
+.og{position:relative;width:1200px;height:630px;font-family:"Bricolage",system-ui,sans-serif;color:#F1F3EA}
+canvas{position:absolute;left:0;top:0;width:1200px;height:630px}
+.copy{position:absolute;left:72px;top:64px;bottom:64px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:12px;font-size:24px;font-weight:700}
+.brand img{width:64px}
+h1{margin-top:auto;font-size:196px;font-weight:800;font-stretch:75%;letter-spacing:-.025em;line-height:.84}
+.role{margin-top:30px;font-size:34px;font-weight:550;letter-spacing:-.01em}
+.chip{margin-top:22px;align-self:flex-start;display:inline-flex;align-items:center;gap:12px;padding:12px 22px;border-radius:99px;background:#C9F28C;color:#0F1C12;font-size:22px;font-weight:700}
+.chip i{width:11px;height:11px;border-radius:50%;background:#0F1C12}
+</style></head>
+<body><div class="og">
+<canvas id="c" width="2400" height="1260"></canvas>
+<div class="copy">
+  <div class="brand"><img src="__RAVEN__" alt=""></div>
+  <h1>Atul<br>Saini</h1>
+  <p class="role">Full-stack developer and AI engineer</p>
+  <span class="chip"><i></i>Ask the AI on my site anything</span>
+</div>
+</div>
+<script>
+const c=document.getElementById("c"),x=c.getContext("2d");x.scale(2,2);
+let seed=11;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+// stars
+for(let i=0;i<260;i++){x.globalAlpha=.15+r()*.55;x.fillStyle=r()<.14?"#C9F28C":"#F1F3EA";const s=.6+r()*1.6;x.fillRect(r()*1200,r()*600,s,s)}
+x.globalAlpha=1;
+// rim glow behind the head
+const g=x.createRadialGradient(920,230,0,920,230,420);g.addColorStop(0,"rgba(201,242,140,.22)");g.addColorStop(1,"rgba(201,242,140,0)");x.fillStyle=g;x.fillRect(0,0,1200,630);
+const DEEP=[110,95,214],LILAC=[176,161,249],BONE=[241,243,234],LIME=[201,242,140];
+const mix=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+const tone=l=>l<.45?mix(DEEP,LILAC,l/.45):l<.78?mix(LILAC,BONE,(l-.45)/.33):mix(BONE,LIME,(l-.78)/.22);
+const img=new Image();img.src="__PORTRAIT__";
+img.onload=async()=>{
+  const ph=600,pw=ph*img.naturalWidth/img.naturalHeight,ox=1200-pw-30,oy=630-ph,gap=4.2;
+  const sw=Math.round(pw/gap),sh=Math.round(ph/gap),o=document.createElement("canvas");o.width=sw;o.height=sh;
+  const oc=o.getContext("2d");oc.drawImage(img,0,0,sw,sh);const d=oc.getImageData(0,0,sw,sh).data;
+  for(let yy=0;yy<sh;yy++)for(let xx=0;xx<sw;xx++){const i=(yy*sw+xx)*4;if(d[i+3]<10)continue;const l=d[i]/255,a=d[i+3]/255;
+    x.fillStyle=`rgb(${tone(l)})`;const s=gap*(.22+l*.7)*Math.pow(a,.9);x.fillRect(ox+xx*gap,oy+yy*gap,s,s)}
+  await document.fonts.ready;document.body.dataset.ready="1";
+};
+</script></body></html>

@@ -14,7 +14,7 @@ export default function Globe2D({ items, spin, onHover }: { items: string[]; spi
     const cv = ref.current, c = cv?.getContext("2d"), host = cv?.parentElement;
     if (!cv || !c || !host) return;
     const pts = fibonacciSphere(items.length).map((p, i) => ({ ...p, t: items[i] }));
-    const mesh = fibonacciSphere(90);
+    const mesh = fibonacciSphere(90, 1);
     let W = 0, H = 0, ry = 0, rx = -0.2, mx = -1, my = -1, frame = 0, lastHot: string | null = null;
     const size = () => {
       const dpr = Math.min(devicePixelRatio || 1, 2);

@@ -6,6 +6,7 @@ import type { Project } from "@/data/site";
 import { useSite } from "@/lib/site-context";
 import { EASE_OUT } from "@/lib/motion";
 import { ProjectArt, TONE_BG, inkFor } from "./ProjectArt";
+import { ProjectDemo } from "../demos/ProjectDemo";
 
 export function ProjectDrawer({ project, onClose }: { project: Project | null; onClose: () => void }) {
   const { lock, unlock } = useSite();
@@ -32,12 +33,15 @@ export function ProjectDrawer({ project, onClose }: { project: Project | null; o
             transition={{ duration: 0.75, ease: EASE_OUT }}
           >
             <button className="close" ref={closeRef} onClick={onClose} aria-label="Close project">✕</button>
-            <div className="dart" style={{ background: TONE_BG[project.tone] }}>
-              <div className="dart-inner"><ProjectArt kind={project.art} ink={inkFor(project.tone)} /></div>
-            </div>
+            {!project.demo && (
+              <div className="dart" style={{ background: TONE_BG[project.tone] }}>
+                <div className="dart-inner"><ProjectArt kind={project.art} ink={inkFor(project.tone)} /></div>
+              </div>
+            )}
             <h3 id="drawer-title">{project.name}</h3>
             <p className="k">{project.kind}</p>
             <p>{project.summary}</p>
+            {project.demo && <ProjectDemo kind={project.demo} />}
             <dl>
               {project.problem && (
                 <>

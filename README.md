@@ -22,18 +22,37 @@ npm start
 
 ## Before you publish
 
-Open `src/data/site.ts` and replace:
+1. **Resume:** put your PDF at `public/resume.pdf`. Resume buttons appear automatically once it exists.
+2. **AI key:** add `ANTHROPIC_API_KEY` in Vercel (see `.env.example`). Without it, "Ask my AI" answers from your profile data instead of a live model.
+3. **Facts:** fill in the empty `facts` in `src/data/site.ts` (studying, currently, off screen). Empty ones stay hidden.
+4. **Links:** add each project's `liveUrl` / `sourceUrl` (point `sourceUrl` at the repo, not your profile).
 
-- `email`, `github` and `linkedin` (they are placeholders)
-- each project's `summary`, `stack` and `role`, and add `liveUrl` / `sourceUrl` once they are public
+Everything on the page, and everything the AI knows, reads from `src/data/site.ts`.
 
-Everything on the page reads from that file.
+## Ask my AI
+
+- `src/components/ask/AskAtul.tsx` is the panel. Open it with the nav button, ⌘K / Ctrl+K, or `/`.
+- `src/app/api/ask/route.ts` streams answers from Claude, with a per-IP rate limit (12 per minute) and input caps.
+- `src/lib/ask/brain.ts` builds the AI's knowledge from `site.ts`, holds the system prompt, and has the offline answers.
+- The AI steers the page with tokens like `[[go:work]]`, `[[open:meshrelay]]`, `[[quick]]`, `[[resume]]` and `[[email]]`. The panel strips them from the text and runs them.
+
+## Recruiter view
+
+`src/components/QuickView.tsx` is a one-screen, no-animation summary. Send recruiters `https://your-site/?view=quick` to skip the intro and land straight on it. It also prints cleanly.
+
+## Project demos
+
+Projects with a `demo` field get a live demo in their drawer (`src/components/demos/`): `mesh` (MeshRelay routing), `ledger` (MoneyMate filtering with a timer) and `heal` (ScrapeFlow self-healing selector). They load only when the drawer opens.
+
+## Link preview image
+
+`public/og.png` (1200×630) is rendered from `scripts/og.html`. To regenerate it: `npm i -D playwright && npx playwright install chromium && node scripts/make-og.mjs`.
 
 ## What's where
 
 | File | What it does |
 | --- | --- |
-| `src/components/Loader.tsx` | Intro video with a rolling odometer counter whose colour follows the video, then a three-colour wipe. Plays on every load and refresh; "Replay intro" in the footer plays it again. |
+| `src/components/Loader.tsx` | Intro video with a rolling odometer counter whose colour follows the video, then a three-colour wipe. Plays once per browser session (and is skipped for `?view=quick` links); "Replay intro" in the footer plays it again. |
 | `src/components/hero/HeroScene.tsx` | The hero canvas: star field, cursor glow, rim light and the signature written by a shooting star, all drawn **behind** the portrait (Atul's silhouette is cut out of that layer). On top: the halftone particle portrait, which flees the cursor, scatters on click with a shockwave, and dissolves as you scroll. |
 | `src/components/hero/Hero.tsx`, `HeroName.tsx` | Name letters flip up on intro and swell toward the cursor; the intro line decodes (`ScrambleText.tsx`); scroll cue; copy parallax on scroll. |
 | `src/components/Nav.tsx` | Drops in after the intro. Lime hover blob that springs between links, a dot under the section you're in, a scroll-progress line, compacts after scrolling, hides on scroll down. The raven logo turns to follow the cursor. Magnetic "Let's talk" button. Full-screen mobile menu with socials and local time. |

@@ -11,7 +11,7 @@ import { HeroName } from "./HeroName";
 import { HeroScene } from "./HeroScene";
 
 export function Hero() {
-  const { introRun, navigate } = useSite();
+  const { introRun, navigate, setQuickView } = useSite();
   const ref = useRef<HTMLElement>(null);
   const started = introRun > 0;
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
@@ -38,6 +38,9 @@ export function Hero() {
             <i />
             <RollText>{site.availability}</RollText>
           </motion.a>
+          <motion.button className="quick-btn" onClick={() => setQuickView(true)} {...rise(1.25)}>
+            <RollText>Hiring? See the 30-second version</RollText>
+          </motion.button>
         </div>
       </motion.div>
       <motion.div className="scroll-cue" style={{ opacity: cueOpacity }}>

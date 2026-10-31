@@ -22,7 +22,7 @@ function useIndiaTime() {
 }
 
 export function Contact() {
-  const { navigate, replayIntro, toast } = useSite();
+  const { navigate, replayIntro, toast, setQuickView, hasResume } = useSite();
   const time = useIndiaTime();
   const headRef = useRef<HTMLHeadingElement>(null);
   useProximityType(headRef, ".l", { base: 800, max: 300, wdth: [75, 100], radius: 260, pull: 8, tint: true });
@@ -85,6 +85,8 @@ export function Contact() {
           <nav aria-label="Footer">
             <a href={site.github} target="_blank" rel="noopener"><RollText>GitHub</RollText></a>
             <a href={site.linkedin} target="_blank" rel="noopener"><RollText>LinkedIn</RollText></a>
+            {hasResume && <a href={site.resume} target="_blank" rel="noopener"><RollText>Resume</RollText></a>}
+            <button onClick={() => setQuickView(true)}><RollText>Recruiter view</RollText></button>
             <button onClick={replayIntro}><RollText>Replay intro</RollText></button>
             <button onClick={() => navigate("top")}><RollText>Back to top</RollText></button>
           </nav>
