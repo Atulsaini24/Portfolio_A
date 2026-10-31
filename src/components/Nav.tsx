@@ -74,7 +74,6 @@ function useIndiaTime() {
 export function Nav() {
   const { navigate, lock, unlock, introRun } = useSite();
   const [hovered, setHovered] = useState<string | null>(null);
-  const [hidden, setHidden] = useState(false);
   const [compact, setCompact] = useState(false);
   const [open, setOpen] = useState(false);
   const active = useActiveSection(SECTION_IDS);
@@ -84,9 +83,6 @@ export function Nav() {
   const shown = introRun > 0;
 
   useMotionValueEvent(scrollY, "change", (y) => {
-    const prev = scrollY.getPrevious() ?? 0;
-    setHidden(y > prev + 2 && y > 240 && !open);
-    if (y < prev - 2) setHidden(false);
     setCompact(y > 80);
   });
 
@@ -112,7 +108,7 @@ export function Nav() {
 
   return (
     <>
-      <header className={`nav${hidden ? " hide" : ""}${compact ? " compact" : ""}${open ? " menu-open" : ""}`}>
+      <header className={`nav${compact ? " compact" : ""}${open ? " menu-open" : ""}`}>
         <div className="wrap">
           <motion.a href="#top" className="brand" onClick={go("top")} aria-label={`${site.name}, back to top`} {...drop(0)}>
             <RavenLogo />

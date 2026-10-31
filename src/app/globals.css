@@ -59,16 +59,15 @@ html.has-cursor body,html.has-cursor a,html.has-cursor button,html.has-cursor ca
 .swipe img{width:120px;height:auto}
 
 /* ---------- nav ---------- */
-.nav{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:0;right:0;z-index:100;transition:transform .5s var(--ease)}
-.nav.hide{transform:translateY(-140%)}
+.nav{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:0;right:0;z-index:100}
 .nav.menu-open{z-index:120}
-.nav.menu-open .brand{color:var(--ink)}
+.nav.menu-open .brand{color:var(--ink);background:rgba(241,243,234,.95)}
+.nav.menu-open .brand-name{color:var(--ink)}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em}
-.brand .raven{display:inline-block;width:46px;transform-origin:50% 60%}
-.brand .raven img{width:46px;height:auto}
-.brand-name{font-size:1rem;display:inline-block;max-width:12ch;overflow:hidden;white-space:nowrap;transition:max-width .6s var(--ease),opacity .4s}
-.nav.compact .brand-name{max-width:0;opacity:0}
+.brand{display:inline-flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em;padding:6px 16px 6px 8px;border-radius:99px;background:rgba(19,34,23,.82);backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%);border:1px solid var(--line);box-shadow:0 8px 32px rgba(0,0,0,.35);transition:background .3s,border-color .3s}
+.brand .raven{display:inline-block;width:38px;height:38px;transform-origin:50% 60%}
+.brand .raven img{width:38px;height:auto;display:block}
+.brand-name{font-size:.95rem;font-weight:700;display:inline-block;white-space:nowrap;color:var(--bone);letter-spacing:-.01em}
 .nav-right{display:flex;align-items:center;gap:12px}
 .pill{position:relative;display:flex;gap:2px;padding:6px;border-radius:99px;background:rgba(19,34,23,.62);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border:1px solid var(--line)}
 .pill a{position:relative;padding:.55em 1.1em;border-radius:99px;font-size:.95rem;font-weight:550;transition:color .3s}
@@ -107,7 +106,7 @@ a:hover .roll .ch,button:hover .roll .ch{transform:translateY(-50%)}
 .sheet nav a{display:block;overflow:hidden;font-size:clamp(3rem,14vw,6rem);font-weight:800;font-stretch:80%;line-height:1;letter-spacing:-.03em;padding:.06em 0}
 .sheet nav a span{display:block;transform:translateY(105%);transition:transform .7s var(--ease),color .3s;transition-delay:var(--d,0s)}
 .sheet.open nav a span{transform:none}
-@media (max-width:860px){ .pill,.nav .cta{display:none} .menu-btn{display:grid} .nav.compact .brand-name{max-width:12ch;opacity:1} }
+@media (max-width:860px){ .pill,.nav .cta{display:none} .menu-btn{display:grid} }
 
 /* ---------- hero ---------- */
 .hero{position:relative;min-height:100svh;overflow:hidden;display:flex;align-items:flex-end;padding-bottom:clamp(72px,6vw,96px)}
