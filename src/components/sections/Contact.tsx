@@ -1,12 +1,13 @@
 "use client";
 
 import { motion, useMotionValue, useSpring } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { site } from "@/data/site";
 import { useSite } from "@/lib/site-context";
-import { hasFinePointer, prefersReducedMotion } from "@/lib/motion";
+import { EASE_OUT, hasFinePointer, prefersReducedMotion } from "@/lib/motion";
+import { useProximityType } from "@/lib/use-proximity-type";
 import { RollText } from "../RollText";
-import { Signature } from "../hero/Signature";
+import { ShootingSignature } from "../hero/ShootingSignature";
 
 function useIndiaTime() {
   const [time, setTime] = useState("");
@@ -23,6 +24,10 @@ function useIndiaTime() {
 export function Contact() {
   const { navigate, replayIntro, toast } = useSite();
   const time = useIndiaTime();
+  const headRef = useRef<HTMLHeadingElement>(null);
+  useProximityType(headRef, ".l", { base: 800, max: 300, wdth: [75, 100], radius: 260, pull: 8, tint: true });
+  const heading = ["Let’s build", "something", "good"];
+  let li = 0;
   const mx = useMotionValue(0), my = useMotionValue(0);
   const x = useSpring(mx, { stiffness: 220, damping: 14, mass: 0.6 });
   const y = useSpring(my, { stiffness: 220, damping: 14, mass: 0.6 });
@@ -46,7 +51,24 @@ export function Contact() {
   return (
     <section className="contact" id="contact">
       <div className="wrap">
-        <h2>Let’s build something good</h2>
+        <motion.h2 ref={headRef} aria-label={heading.join(" ")} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.4 }}>
+          {heading.map((line) => (
+            <span className="reveal-line" key={line} aria-hidden="true">
+              {[...line].map((ch) => {
+                const i = li++;
+                return (
+                  <motion.span
+                    className="l" key={i}
+                    variants={{ hidden: { y: "110%" }, show: { y: "0%" } }}
+                    transition={{ duration: 0.9, delay: i * 0.025, ease: EASE_OUT }}
+                  >
+                    {ch === " " ? "\u00a0" : ch}
+                  </motion.span>
+                );
+              })}
+            </span>
+          ))}
+        </motion.h2>
         <div className="contact-row">
           <motion.a className="magnet" href={`mailto:${site.email}`} style={{ x, y }} onPointerMove={magnet} onPointerLeave={() => { mx.set(0); my.set(0); }}>
             <RollText>Say hello</RollText>
@@ -55,7 +77,7 @@ export function Contact() {
             <RollText>{site.email}</RollText>
           </button>
         </div>
-        <Signature className="bigsig" duration={3.6} fill={0} />
+        <ShootingSignature className="bigsig" />
       </div>
       <footer>
         <div className="wrap">

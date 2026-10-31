@@ -5,7 +5,9 @@ import type { Spin } from "./spin";
 import { fibonacciSphere } from "./spin";
 
 /** Canvas 2D version of the tools globe for devices without WebGL. Same look, same controls. */
-export default function Globe2D({ items, spin }: { items: string[]; spin: React.RefObject<Spin> }) {
+export default function Globe2D({ items, spin, onHover }: { items: string[]; spin: React.RefObject<Spin>; onHover: (t: string | null) => void }) {
+  const hoverRef = useRef(onHover);
+  hoverRef.current = onHover;
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -13,7 +15,7 @@ export default function Globe2D({ items, spin }: { items: string[]; spin: React.
     if (!cv || !c || !host) return;
     const pts = fibonacciSphere(items.length).map((p, i) => ({ ...p, t: items[i] }));
     const mesh = fibonacciSphere(90);
-    let W = 0, H = 0, ry = 0, rx = -0.2, mx = -1, my = -1, frame = 0;
+    let W = 0, H = 0, ry = 0, rx = -0.2, mx = -1, my = -1, frame = 0, lastHot: string | null = null;
     const size = () => {
       const dpr = Math.min(devicePixelRatio || 1, 2);
       W = host.clientWidth; H = host.clientHeight;
@@ -48,6 +50,8 @@ export default function Globe2D({ items, spin }: { items: string[]; spin: React.
       const list = pts.map((p) => { const q = rot(p); return { p, q, ...proj(q) }; }).sort((a, b) => a.q.z - b.q.z);
       let hot: (typeof list)[number] | null = null;
       for (const it of list) if (it.q.z > -0.2 && Math.abs(mx - it.x) < 60 && Math.abs(my - it.y) < 18) hot = it;
+      const hotName = hot ? hot.p.t : null;
+      if (hotName && hotName !== lastHot) { lastHot = hotName; hoverRef.current(hotName); }
       for (const it of list) {
         const d = (it.q.z + 1) / 2, isHot = it === hot, fs = (13 + 5 * d) * (isHot ? 1.2 : 1);
         c.font = `700 ${fs}px "Bricolage Grotesque Variable", system-ui, sans-serif`;

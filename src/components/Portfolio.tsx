@@ -10,6 +10,7 @@ import { Work } from "./sections/Work";
 import { ToolsGlobe } from "./tools/ToolsGlobe";
 import { FlappyRaven } from "./sections/FlappyRaven";
 import { Contact } from "./sections/Contact";
+import { VelocityMarquee } from "./VelocityMarquee";
 
 export default function Portfolio() {
   return (
@@ -19,6 +20,10 @@ export default function Portfolio() {
       <Nav />
       <main>
         <Hero />
+        <div className="bands">
+          <VelocityMarquee className="band-lime" baseVelocity={-2.5} items={["Full-stack", "AI products", "Motion", "3D on the web", "Product thinking"]} />
+          <VelocityMarquee className="band-ink" baseVelocity={2} items={["Next.js", "TypeScript", "Python", "Three.js", "PostgreSQL", "LLMs"]} />
+        </div>
         <About />
         <Work />
         <ToolsGlobe />

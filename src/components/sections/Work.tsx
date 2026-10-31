@@ -1,10 +1,11 @@
 "use client";
 
-import { motion, useMotionValue, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, useMotionValue, useScroll, useSpring, useTransform, useVelocity } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { projects, type Project } from "@/data/site";
 import { useSite } from "@/lib/site-context";
 import { hasFinePointer, prefersReducedMotion } from "@/lib/motion";
+import { RevealText } from "../RevealText";
 import { RollText } from "../RollText";
 import { ProjectArt, inkFor } from "./ProjectArt";
 import { ProjectDrawer } from "./ProjectDrawer";
@@ -44,6 +45,10 @@ export function Work() {
   const [open, setOpen] = useState<Project | null>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
   const x = useTransform(scrollYProgress, (p) => -p * distance);
+  // Cards lean into the direction of travel, harder the faster you scroll.
+  const { scrollY } = useScroll();
+  const velocity = useSpring(useVelocity(scrollY), { damping: 40, stiffness: 300 });
+  const skewX = useTransform(velocity, [-3000, 3000], prefersReducedMotion() ? [0, 0] : [6, -6], { clamp: true });
 
   useEffect(() => {
     const measure = () => {
@@ -63,12 +68,12 @@ export function Work() {
   return (
     <section className="work" id="work">
       <div className="wrap work-head">
-        <h2 className="h2">Things<br />I’ve built</h2>
+        <RevealText className="h2" lines={["Things", "I’ve built"]} />
         <p>Scroll to move through the projects. Open any card for the details.</p>
       </div>
       <div className="hscroll" ref={sectionRef}>
         <div className="hsticky">
-          <motion.div className="track" ref={trackRef} style={{ x }}>
+          <motion.div className="track" ref={trackRef} style={{ x, skewX }}>
             {projects.map((p) => <ProjectCard key={p.slug} project={p} onOpen={() => setOpen(p)} />)}
             <div className="end">
               <p>More case studies are on the way.</p>

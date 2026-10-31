@@ -3,21 +3,46 @@
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "motion/react";
 import { useRef } from "react";
 import { capabilities, site } from "@/data/site";
+import { EASE_OUT } from "@/lib/motion";
+import { RavenStage } from "../raven/RavenStage";
 
 function Word({ word, progress, range }: { word: string; progress: MotionValue<number>; range: [number, number] }) {
-  const opacity = useTransform(progress, range, [0.18, 1]);
-  return <motion.span className="w" style={{ opacity }}>{word} </motion.span>;
+  const opacity = useTransform(progress, range, [0.16, 1]);
+  const y = useTransform(progress, range, [6, 0]);
+  return <><motion.span className="w" style={{ opacity, y }}>{word}</motion.span>{" "}</>;
+}
+
+function Capability({ title, detail, index }: { title: string; detail: string; index: number }) {
+  return (
+    <motion.div
+      className="cap"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.6 }}
+      transition={{ duration: 0.8, delay: index * 0.08, ease: EASE_OUT }}
+      onPointerMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+      }}
+    >
+      <h3>{title}</h3>
+      <p>{detail}</p>
+    </motion.div>
+  );
 }
 
 export function About() {
+  const sectionRef = useRef<HTMLElement>(null);
   const ref = useRef<HTMLParagraphElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 85%", "end 55%"] });
+  const { scrollYProgress: sectionProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
   const words = site.statement.split(" ");
 
   return (
-    <section className="about" id="about">
-      <div className="wrap">
+    <section className="about" id="about" ref={sectionRef}>
+      <div className="wrap about-grid">
         <p className="statement" ref={ref} aria-label={site.statement}>
           {words.map((w, i) =>
             reduce ? (
@@ -27,14 +52,10 @@ export function About() {
             ),
           )}
         </p>
-        <div className="caps">
-          {capabilities.map((c) => (
-            <div key={c.title}>
-              <h3>{c.title}</h3>
-              <p>{c.detail}</p>
-            </div>
-          ))}
-        </div>
+        <RavenStage scroll={sectionProgress} />
+      </div>
+      <div className="wrap caps">
+        {capabilities.map((c, i) => <Capability key={c.title} {...c} index={i} />)}
       </div>
     </section>
   );

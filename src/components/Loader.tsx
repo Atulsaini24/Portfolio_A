@@ -1,18 +1,42 @@
 "use client";
 
-import { animate } from "motion/react";
+import { animate, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSite } from "@/lib/site-context";
 import { EASE_OUT, prefersReducedMotion } from "@/lib/motion";
 import { RollText } from "./RollText";
 
-const SEEN_KEY = "atul-intro-seen";
 // The loader video's background is forest green until 2.2s, then lime / lilac.
 const DARK_TEXT_AFTER = 2.2;
 const FALLBACK_DURATION = 5.2;
 
+/** One rolling digit column (0–9). */
+function Digit({ value }: { value: number }) {
+  return (
+    <span className="digit">
+      <motion.span className="digit-col" animate={{ y: `${-value * 10}%` }} transition={{ type: "spring", stiffness: 280, damping: 30 }}>
+        {Array.from({ length: 10 }, (_, i) => <span key={i}>{i}</span>)}
+      </motion.span>
+    </span>
+  );
+}
+
+function Odometer({ value }: { value: number }) {
+  const digits = String(value).padStart(value >= 100 ? 3 : 2, "0").split("").map(Number);
+  return (
+    <span className="odometer" aria-hidden="true">
+      {digits.map((d, i) => <Digit key={digits.length - i} value={d} />)}
+      <sup>%</sup>
+    </span>
+  );
+}
+
+/**
+ * Full-screen intro: the loading video with a rolling % counter, then a three-colour wipe.
+ * Plays on every page load (including hard refresh) and when "Replay intro" is pressed.
+ */
 export function Loader() {
-  const { introActive, introRun, finishIntro } = useSite();
+  const { introActive, finishIntro } = useSite();
   const [visible, setVisible] = useState(true);
   const [count, setCount] = useState(0);
   const [darkText, setDarkText] = useState(false);
@@ -21,11 +45,16 @@ export function Loader() {
   const done = useRef(false);
   const shown = useRef(0);
 
+  // Always start a fresh load from the top, so a refresh never lands mid-page under the loader.
+  useEffect(() => {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
+  }, []);
+
   const finish = useCallback(async () => {
     if (done.current) return;
     done.current = true;
     setCount(100);
-    try { sessionStorage.setItem(SEEN_KEY, "1"); } catch {}
     const wipes = Array.from(wipesRef.current?.children ?? []) as HTMLElement[];
     if (prefersReducedMotion() || wipes.length === 0) {
       setVisible(false);
@@ -40,11 +69,10 @@ export function Loader() {
     window.scrollTo(0, 0);
     finishIntro();
     [...wipes].reverse().forEach((w, i) =>
-      animate(w, { y: ["0%", "-100%"] }, { duration: 0.8, delay: i * 0.08, ease: EASE_OUT }),
+      animate(w, { y: ["0%", "-100%"] }, { duration: 0.85, delay: i * 0.08, ease: EASE_OUT }),
     );
   }, [finishIntro]);
 
-  // (Re)start whenever the intro becomes active (first load or "Replay intro").
   useEffect(() => {
     if (!introActive) return;
     done.current = false;
@@ -54,25 +82,26 @@ export function Loader() {
     setDarkText(false);
     wipesRef.current?.querySelectorAll<HTMLElement>("i").forEach((w) => (w.style.transform = "translateY(100%)"));
 
-    let seen = false;
-    try { seen = sessionStorage.getItem(SEEN_KEY) === "1"; } catch {}
-    // Returning visitors in the same tab skip the video; "Replay intro" always plays it.
-    const isReplay = introRun > 0;
-    if (prefersReducedMotion() || (seen && !isReplay)) {
-      const t = setTimeout(finish, 250);
+    if (prefersReducedMotion()) {
+      const t = setTimeout(finish, 300);
       return () => clearTimeout(t);
     }
 
-    const video = videoRef.current;
     const start = performance.now();
     let frame = 0;
-    if (video) {
-      video.currentTime = 0;
-      video.play().catch(() => {});
-    }
+    const tryPlay = () => {
+      const v = videoRef.current;
+      if (v && v.paused) {
+        v.currentTime = 0;
+        v.play().catch(() => {});
+      }
+    };
+    tryPlay();
     const tick = () => {
       if (done.current) return;
       const v = videoRef.current;
+      // The <video> can mount a frame after this effect (e.g. on replay); keep nudging it to play.
+      if (v && v.paused && performance.now() - start < 1500) tryPlay();
       const playing = !!v && !v.paused && !!v.duration;
       const elapsed = (performance.now() - start) / 1000;
       const t = playing ? v!.currentTime : elapsed;
@@ -85,16 +114,14 @@ export function Loader() {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-    // introRun is read only to tell a replay from the first load.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [introActive, finish]);
 
   return (
     <>
       {visible && (
-        <div className={`loader${darkText ? " dark" : ""}`} aria-label="Loading" role="progressbar" aria-valuenow={count} aria-valuemin={0} aria-valuemax={100}>
-          <video ref={videoRef} src="/assets/intro-loader.mp4" muted playsInline preload="auto" />
-          <div className="count" aria-hidden="true">{count}<sup>%</sup></div>
+        <div className={`loader${darkText ? " dark" : ""}`} role="progressbar" aria-label="Loading" aria-valuenow={count} aria-valuemin={0} aria-valuemax={100}>
+          <video ref={videoRef} src="/assets/intro-loader.mp4" muted playsInline autoPlay preload="auto" />
+          <div className="count"><Odometer value={count} /></div>
           <button className="skip" onClick={finish}><RollText>Skip intro</RollText></button>
           <div className="bar" style={{ transform: `scaleX(${count / 100})` }} />
         </div>

@@ -8,6 +8,7 @@ import type { Spin } from "./spin";
 import { fibonacciSphere } from "./spin";
 
 const RADIUS = 3.4;
+type GlobeProps = { items: string[]; spin: React.RefObject<Spin>; onHover: (t: string | null) => void };
 const FONT = '700 64px "Bricolage Grotesque Variable", system-ui, sans-serif';
 
 function useLabelTexture(text: string, fontVersion: number) {
@@ -40,7 +41,7 @@ function useLabelTexture(text: string, fontVersion: number) {
   return { texture, draw };
 }
 
-function Label({ text, position, fontVersion }: { text: string; position: THREE.Vector3; fontVersion: number }) {
+function Label({ text, position, fontVersion, onHover }: { text: string; position: THREE.Vector3; fontVersion: number; onHover: (t: string | null) => void }) {
   const ref = useRef<THREE.Sprite>(null);
   const hot = useRef(false);
   const world = useMemo(() => new THREE.Vector3(), []);
@@ -60,15 +61,16 @@ function Label({ text, position, fontVersion }: { text: string; position: THREE.
   return (
     <sprite
       ref={ref} position={position} scale={[2, 0.5, 1]}
-      onPointerOver={(e) => { e.stopPropagation(); hot.current = true; draw(true); }}
+      onPointerOver={(e) => { e.stopPropagation(); hot.current = true; draw(true); onHover(text); }}
       onPointerOut={() => { hot.current = false; draw(false); }}
+      onClick={(e) => { e.stopPropagation(); onHover(text); }}
     >
       <spriteMaterial map={texture} transparent depthWrite={false} />
     </sprite>
   );
 }
 
-function Globe({ items, spin }: { items: string[]; spin: React.RefObject<Spin> }) {
+function Globe({ items, spin, onHover }: GlobeProps) {
   const group = useRef<THREE.Group>(null);
   const core = useRef<THREE.Mesh>(null);
   const [fontVersion, setFontVersion] = useState(0);
@@ -97,7 +99,7 @@ function Globe({ items, spin }: { items: string[]; spin: React.RefObject<Spin> }
       <points geometry={shell}>
         <pointsMaterial color={PALETTE.lime} size={0.07} />
       </points>
-      {items.map((t, i) => <Label key={t} text={t} position={positions[i]} fontVersion={fontVersion} />)}
+      {items.map((t, i) => <Label key={t} text={t} position={positions[i]} fontVersion={fontVersion} onHover={onHover} />)}
     </group>
   );
 }
@@ -115,11 +117,11 @@ function FitCamera() {
   return null;
 }
 
-export default function Globe3D({ items, spin }: { items: string[]; spin: React.RefObject<Spin> }) {
+export default function Globe3D({ items, spin, onHover }: GlobeProps) {
   return (
     <Canvas camera={{ position: [0, 0, 9.5], fov: 40 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true }} frameloop="always">
       <FitCamera />
-      <Globe items={items} spin={spin} />
+      <Globe items={items} spin={spin} onHover={onHover} />
     </Canvas>
   );
 }

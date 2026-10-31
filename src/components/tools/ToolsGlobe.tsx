@@ -1,8 +1,10 @@
 "use client";
 
+import { AnimatePresence, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { technologies } from "@/data/site";
+import { technologies, toolNotes } from "@/data/site";
+import { RevealText } from "../RevealText";
 import { hasWebGL, type Spin } from "./spin";
 
 const Globe3D = dynamic(() => import("./Globe3D"), { ssr: false });
@@ -14,6 +16,7 @@ export function ToolsGlobe() {
   const last = useRef({ x: 0, y: 0 });
   const [mode, setMode] = useState<"3d" | "2d" | null>(null);
   const [inView, setInView] = useState(false);
+  const [hot, setHot] = useState<string | null>(null);
 
   useEffect(() => {
     setMode(hasWebGL() ? "3d" : "2d");
@@ -43,16 +46,29 @@ export function ToolsGlobe() {
     <section className="tools" id="tools">
       <div className="wrap tools-grid">
         <div>
-          <h2 className="h2">Tools I<br />reach for</h2>
-          <p className="lead">The stack behind the work. Drag the globe to spin it, and hover a tool to pull it forward.</p>
+          <RevealText className="h2" lines={["Tools I", "reach for"]} />
+          <p className="lead">The stack behind the work. Drag the globe to spin it, and hover or tap a tool to see what I use it for.</p>
+          <div className="tool-note" aria-live="polite">
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={hot ?? "none"}
+                initial={{ opacity: 0, y: 14, filter: "blur(6px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, y: -10, filter: "blur(6px)" }}
+                transition={{ duration: 0.35 }}
+              >
+                {hot ? <><b>{hot}</b>{toolNotes[hot] ?? ""}</> : <span className="muted">Nothing selected yet.</span>}
+              </motion.p>
+            </AnimatePresence>
+          </div>
         </div>
         <div
           className="globe" ref={hostRef} data-cursor="Drag"
           onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
           role="img" aria-label={`Interactive globe of the tools Atul uses: ${technologies.join(", ")}`}
         >
-          {inView && mode === "3d" && <Globe3D items={technologies} spin={spin} />}
-          {inView && mode === "2d" && <Globe2D items={technologies} spin={spin} />}
+          {inView && mode === "3d" && <Globe3D items={technologies} spin={spin} onHover={setHot} />}
+          {inView && mode === "2d" && <Globe2D items={technologies} spin={spin} onHover={setHot} />}
         </div>
       </div>
     </section>
